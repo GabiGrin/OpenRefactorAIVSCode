@@ -1,8 +1,14 @@
 {
   "name": "openrefactorai",
-  "displayName": "OpenRefactorAI",
+  "displayName": "OpenRefactor AI",
   "publisher": "gabrielgrinberg",
-  "description": "Perform complex refactors on on any programming language with the power of LLMs 🚀",
+  "description": "Use OpenAI to refactor your code ✨ Perform complex refactors on on any programming language with the power of LLMs 🚀",
+  "keywords": [
+    "refactor",
+    "chatgpt",
+    "openai",
+    "ai refactor"
+  ],
   "version": "1.0.1",
   "icon": "assets/icon.png",
   "repository": {
