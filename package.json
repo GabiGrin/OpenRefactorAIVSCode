@@ -1,0 +1,80 @@
+{
+  "name": "openrefactorai",
+  "displayName": "OpenRefactorAI",
+  "description": "Perform complex refactors on on any programming language with the power of LLMs 🚀",
+  "version": "1.0.0",
+  "logo": "assets/logo.png",
+  "engines": {
+    "vscode": "^1.78.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "configuration": {
+      "title": "OpenRefactorAI",
+      "properties": {
+        "openrefactorai.openAiKey": {
+          "type": "string",
+          "default": "",
+          "description": "OpenAI API Key"
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "openrefactorai.setOpenAiKey",
+        "title": "OpenRefactorAI: Set OpenAI Key"
+      },
+      {
+        "command": "openrefactorai.removeOpenAiKey",
+        "title": "OpenRefactorAI: Remove OpenAI Key"
+      },
+      {
+        "command": "openrefactorai.refactor",
+        "title": "OpenRefactorAI: Refactor"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "when": "editorHasSelection",
+          "command": "openrefactorai.refactor",
+          "group": "1_modification"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "pnpm run package",
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "pnpm run compile-tests && pnpm run compile && pnpm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/glob": "^8.1.0",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "16.x",
+    "@types/vscode": "^1.78.0",
+    "@typescript-eslint/eslint-plugin": "^5.59.1",
+    "@typescript-eslint/parser": "^5.59.1",
+    "@vscode/test-electron": "^2.3.0",
+    "eslint": "^8.39.0",
+    "glob": "^8.1.0",
+    "mocha": "^10.2.0",
+    "ts-loader": "^9.4.2",
+    "typescript": "^5.0.4",
+    "webpack": "^5.81.0",
+    "webpack-cli": "^5.0.2"
+  },
+  "dependencies": {
+    "openai": "^3.2.1"
+  }
+}
