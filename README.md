@@ -2,6 +2,8 @@
 
 Always wanted to refactor a piece of code using the power of AI without leaving your IDE? Now you can!
 
+![Demo](https://github.com/GabiGrin/OpenRefactorAIVSCode/assets/3727015/47ce902b-ea62-4f91-80da-0d8914a8731a)
+
 OpenRefactorAI is a VSCode extension that uses OpenAI to refactor your code according to your instructions. With OpenRefactorAI, you can leverage the power of AI to refactor pieces of code with ease and precision.
 
 ## Features
