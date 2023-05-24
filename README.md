@@ -9,11 +9,12 @@ OpenRefactorAI is a VSCode extension that uses OpenAI to refactor your code acco
 ## Features
 
 - Select a piece of code and refactor it using OpenAI
+- Save refactoring instructions for future use
 
 ## Roadmap
 
-- Save refactoring instructions for future use
 - Support refactoring across multiple files
+- Better progress indication using a stream response
 
 ## How to use
 
@@ -37,7 +38,7 @@ This extension contributes the following settings:
 
 ## Known Issues
 
-Please report any issues you find on the GitHub issues page at `<insert github repo link>`.
+Please report any issues you find on the GitHub issues page at https://github.com/GabiGrin/OpenRefactorAIVSCode/issues.
 
 ## Contributing
 

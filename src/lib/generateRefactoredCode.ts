@@ -1,5 +1,5 @@
 import { OpenAIApi, Configuration } from "openai";
-import { getApiKey } from "./storage";
+import { getApiKey } from "./apiKeyStorage";
 
 function fakeProgressReporter(
   expectedTime: number,
@@ -11,17 +11,17 @@ function fakeProgressReporter(
   cb(0);
   const interval = setInterval(() => {
     const real = (Date.now() - startTime) / expectedTime;
-    const progress = Math.min(real + (stepValue * Math.random()) / 2, 0.85);
+    const progress = Math.min(real + (stepValue * Math.random()) / 2, 0.95);
     cb(progress);
   }, stepTime);
   return () => clearInterval(interval);
 }
 
 function estimateTimeForPrompt(prompt: string) {
-  return prompt.length * 10;
+  return 6000 + prompt.length * 10;
 }
 
-export async function refactor(
+export async function generateRefactoredCode(
   source: string,
   instructions: string,
   onFakeProgress?: (progress: number) => void

@@ -2,16 +2,25 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
-import { CommandTypes, setCommandsRouter } from "./router";
-import { getApiKey, setApiKey } from "./storage";
-import { refactor } from "./refactor";
+import { CommandTypes, setCommandsRouter } from "./commandsRouter";
+import { setApiKey } from "./lib/apiKeyStorage";
+
+import {
+  SavedRefactoring,
+  getSavedRefactors,
+  saveRefactorUsage,
+} from "./lib/savedRefactorings";
+import { maybeSaveRefactoring } from "./lib/maybeSaveRefactoring";
+import { assertRefactorPrerequisites } from "./lib/assertRefactorPrerequisites";
+import { applyRefactoring } from "./lib/applyRefactoring";
+import { pickSavedRefactoring } from "./lib/pickSavedRefactoring";
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
   setCommandsRouter(
     {
-      [CommandTypes.SET_OPEN_AI_KEY]: async () => {
+      [CommandTypes.setOpenAiKey]: async () => {
         const apiKeyFromUser = await vscode.window.showInputBox({
           placeHolder: "Enter your OpenAI API key",
           prompt: "Enter your OpenAI API key",
@@ -20,91 +29,64 @@ export function activate(context: vscode.ExtensionContext) {
         setApiKey(apiKeyFromUser ?? "");
         vscode.window.showInformationMessage("OpenAI API key set");
       },
-      [CommandTypes.REMOVE_OPEN_AI_KEY]: async () => {
+      [CommandTypes.resetOpenAiKey]: async () => {
         setApiKey("");
         vscode.window.showInformationMessage("OpenAI API key removed");
       },
-      [CommandTypes.REFACTOR]: async () => {
-        const apiKey = getApiKey();
-        if (!apiKey) {
-          vscode.window.showInformationMessage(
-            "No OpenAI API key set. Please use the command 'OpenRefactorAI: Set OpenAI API key' to set your key."
-          );
+      [CommandTypes.refactor]: async () => {
+        assertRefactorPrerequisites();
+
+        const pick = await pickSavedRefactoring();
+
+        if (!pick) {
+          vscode.window.showInformationMessage("No option selected");
           return;
-        }
+        } else if (pick.type === "new") {
+          const instructions = await vscode.window.showInputBox({
+            placeHolder:
+              "change all occurrences of 'foo' to 'bar' and all occurrences of 'baz' to 'qux'",
+            prompt:
+              "Please provide instructions on the refactoring. Provide examples for best results",
+          });
 
-        const selection = vscode.window.activeTextEditor?.selection;
+          if (!instructions || instructions?.length < 10) {
+            vscode.window.showInformationMessage("Instructions too short");
+            return;
+          }
 
-        const selectedText =
-          vscode.window.activeTextEditor?.document.getText(selection);
+          try {
+            const { tokensUsed } = await applyRefactoring(
+              instructions,
+              vscode.window.activeTextEditor?.selection!
+            );
 
-        if (!selectedText || !selection) {
-          vscode.window.showInformationMessage("No text selected");
-          return;
-        }
+            await maybeSaveRefactoring(instructions, tokensUsed);
+          } catch (e) {
+            vscode.window.showInformationMessage(
+              `Error from OpenAI: ${
+                e instanceof Error
+                  ? e.message
+                  : new Error("unknown error").message
+              }`
+            );
+          }
+        } else {
+          try {
+            const { tokensUsed } = await applyRefactoring(
+              pick.refactoring.instructions,
+              vscode.window.activeTextEditor?.selection!
+            );
 
-        const instructions = await vscode.window.showInputBox({
-          placeHolder:
-            "change all occurrences of 'foo' to 'bar' and all occurrences of 'baz' to 'qux'",
-          prompt:
-            "Please provide instructions on the refactoring. Provide examples for best results",
-        });
-
-        if (!instructions || instructions?.length < 10) {
-          vscode.window.showInformationMessage("Instructions too short");
-          return;
-        }
-
-        vscode.window.showInformationMessage(
-          "Refactoring in progress. This may take a while"
-        );
-
-        try {
-          const now = Date.now();
-          await vscode.window.withProgress(
-            {
-              location: vscode.ProgressLocation.Notification,
-              title: "OpenRefactorAI Progress",
-            },
-            async (progress) => {
-              let lastValue = 0;
-              const { result, tokensUsed } = await refactor(
-                selectedText,
-                instructions,
-                (progressValue) => {
-                  const delta = Math.max(0, progressValue - lastValue);
-                  progress.report({
-                    increment: Math.round(delta * 100),
-                    message: `${(progressValue * 100).toFixed(
-                      1
-                    )}% (guesstimated progress)`,
-                  });
-                  lastValue = progressValue;
-                }
-              );
-
-              const timeTaken = Date.now() - now;
-
-              vscode.window.showInformationMessage(
-                `Refactoring complete. ${tokensUsed} tokens used. Took ${timeTaken}ms. Estimated cost: $${(
-                  (tokensUsed / 1000) *
-                  0.002
-                ).toFixed(5)}`
-              );
-
-              vscode.window.activeTextEditor?.edit((editBuilder) => {
-                editBuilder.replace(selection, result);
-              });
-            }
-          );
-        } catch (e) {
-          vscode.window.showInformationMessage(
-            `Error from OpenAI: ${
-              e instanceof Error
-                ? e.message
-                : new Error("unknown error").message
-            }`
-          );
+            await saveRefactorUsage(pick.refactoring.name, tokensUsed);
+          } catch (e) {
+            vscode.window.showInformationMessage(
+              `Error from OpenAI: ${
+                e instanceof Error
+                  ? e.message
+                  : new Error("unknown error").message
+              }`
+            );
+          }
         }
       },
     },

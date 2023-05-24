@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
 
 export enum CommandTypes {
-  SET_OPEN_AI_KEY = "openrefactorai.setOpenAiKey",
-  REMOVE_OPEN_AI_KEY = "openrefactorai.removeOpenAiKey",
-  REFACTOR = "openrefactorai.refactor",
+  setOpenAiKey = "openrefactorai.setOpenAiKey",
+  resetOpenAiKey = "openrefactorai.removeOpenAiKey",
+  refactor = "openrefactorai.refactor",
 }
 
 type CommandCallback = Parameters<typeof vscode.commands.registerCommand>[1];

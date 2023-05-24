@@ -1,8 +1,16 @@
 # Change Log
 
-All notable changes to the "openrefactorai" extension will be documented in this file.
+All notable changes to the "OpenRefactor AI" extension will be documented in this file.
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+
+## 1.1.0
+
+- Added support for saving and loading refactorings 🚀
+
+## 1.0.2
+
+- Marketplace content changes
 
 ## 1.0.1
 
