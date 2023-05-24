@@ -50,19 +50,20 @@ export function activate(context: vscode.ExtensionContext) {
             "Please provide instructions on the refactoring. Provide examples for best results",
         });
 
-        if (!instructions || instructions?.length < 20) {
+        if (!instructions || instructions?.length < 10) {
           vscode.window.showInformationMessage("Instructions too short");
           return;
         }
 
         vscode.window.showInformationMessage(
-          "Refactoring in progress. This may take a while."
+          "Refactoring in progress. This may take a while"
         );
 
         try {
+          const now = Date.now();
           await vscode.window.withProgress(
             {
-              location: vscode.ProgressLocation.Window,
+              location: vscode.ProgressLocation.Notification,
               title: "OpenRefactorAI Progress",
             },
             async (progress) => {
@@ -71,13 +72,24 @@ export function activate(context: vscode.ExtensionContext) {
                 selectedText,
                 instructions,
                 (progressValue) => {
-                  const delta = Math.min(0, progressValue - lastValue);
-                  progress.report({ increment: delta * 100 });
+                  const delta = Math.max(0, progressValue - lastValue);
+                  progress.report({
+                    increment: Math.round(delta * 100),
+                    message: `${(progressValue * 100).toFixed(
+                      1
+                    )}% (guesstimated progress)`,
+                  });
+                  lastValue = progressValue;
                 }
               );
 
+              const timeTaken = Date.now() - now;
+
               vscode.window.showInformationMessage(
-                `Refactoring complete. ${tokensUsed} tokens used.`
+                `Refactoring complete. ${tokensUsed} tokens used. Took ${timeTaken}ms. Estimated cost: $${(
+                  (tokensUsed / 1000) *
+                  0.002
+                ).toFixed(5)}`
               );
 
               vscode.window.activeTextEditor?.edit((editBuilder) => {

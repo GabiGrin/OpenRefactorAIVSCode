@@ -1,9 +1,14 @@
 {
   "name": "openrefactorai",
   "displayName": "OpenRefactorAI",
+  "publisher": "gabrielgrinberg",
   "description": "Perform complex refactors on on any programming language with the power of LLMs 🚀",
-  "version": "1.0.0",
-  "logo": "assets/logo.png",
+  "version": "1.0.1",
+  "icon": "assets/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GabiGrin/OpenRefactorAIVSCode"
+  },
   "engines": {
     "vscode": "^1.78.0"
   },

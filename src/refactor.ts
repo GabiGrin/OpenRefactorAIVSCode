@@ -5,16 +5,20 @@ function fakeProgressReporter(
   expectedTime: number,
   cb: (progress: number) => void
 ) {
-  const stepTime = expectedTime / 20;
+  const stepTime = Math.min(expectedTime / 20, 100);
   const stepValue = stepTime / expectedTime;
   const startTime = Date.now();
   cb(0);
   const interval = setInterval(() => {
     const real = (Date.now() - startTime) / expectedTime;
-    const progress = Math.min(real + (stepValue * Math.random()) / 2, 0.95);
+    const progress = Math.min(real + (stepValue * Math.random()) / 2, 0.85);
     cb(progress);
   }, stepTime);
   return () => clearInterval(interval);
+}
+
+function estimateTimeForPrompt(prompt: string) {
+  return prompt.length * 10;
 }
 
 export async function refactor(
@@ -28,7 +32,7 @@ export async function refactor(
   const openai = new OpenAIApi(configuration);
 
   const cancel = fakeProgressReporter(
-    (source + instructions).length,
+    estimateTimeForPrompt(source + instructions),
     onFakeProgress ?? (() => {})
   );
   const completion = await openai
